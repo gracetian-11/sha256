@@ -97,7 +97,7 @@ module rotate_16(in, out);
     wire[15:0] body;
     assign body = in[31:16];
 
-    assign out[25:0] = body;
+    assign out[15:0] = body;
     assign out[31:16] = in[15:0];
 
 endmodule
