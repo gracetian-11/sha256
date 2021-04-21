@@ -12,15 +12,17 @@ module alu(data_operandA, data_operandB, ctrl_ALUopcode,
 	
 	assign inner_A = data_operandA;
 	assign inner_B = data_operandB;
-	assign data_result = inner_result;
 	
-	assign isNotEqual = inner_A != inner_B;
-	assign isLessThan = inner_A < inner_B;
-	assign overflow = inner_cout != inner_result[31];
+	assign isNotEqual = data_operandA != data_operandB;
+	assign isLessThan = data_operandA < data_operandB;
+	assign isOverflow = inner_cout != inner_result[31];
+	assign overflow = (ctrl_ALUopcode == 5'b00000 || ctrl_ALUopcode == 5'b00001) ? isOverflow : 1'b0; 
 
-	wire [31:0] rotated_amt;
-	right_rotate ROTR (data_operandA, rotated_amt, ctrl_shiftamt);
-	
+	wire [31:0] rotr_result;
+	right_rotate ROTR (inner_A, rotr_result, ctrl_shiftamt);
+
+	assign data_result = (ctrl_ALUopcode == 5'b00111) ? rotr_result : inner_result;
+
 	always @(ctrl_ALUopcode or inner_A or inner_B or ctrl_shiftamt)
 		begin
 			// Default state for other ctrl_ALUopcode states
@@ -29,9 +31,11 @@ module alu(data_operandA, data_operandB, ctrl_ALUopcode,
 				0 : {inner_cout, inner_result} = inner_A + inner_B; // ADD
 				1 : {inner_cout, inner_result} = inner_A - inner_B;	// SUBTRACT
 				2 : inner_result = inner_A & inner_B;  			    // AND
-				3 : inner_result = inner_A ^ inner_B;  			    // XOR
-				4 : inner_result = rotated_amt;		                // ROTR
+				3 : inner_result = inner_A | inner_B;  			    // OR
+				4 : inner_result = inner_A << ctrl_shiftamt;		// SLL
 				5 : inner_result = inner_A >>> ctrl_shiftamt;	    // SRA
+				6 : inner_result = inner_A ^ inner_B;               // XOR
+				7 : inner_result = rotr_result;                     // ROTR
 			endcase
 		end
 	

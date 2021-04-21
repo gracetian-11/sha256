@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ISA>
+    <Instruction>
+        <Name>rotr</Name>
+        <Type>R</Type>
+        <Code>00111</Code>
+    </Instruction>
+    <Instruction>
+        <Name>xor</Name>
+        <Type>R</Type>
+        <Code>00110</Code>
+    </Instruction>
+</ISA>
