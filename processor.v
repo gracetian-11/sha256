@@ -125,7 +125,7 @@ module processor(
     control writeback_control(mw_out_ir, w_opcode, w_rd, w_rs, w_rt, w_shamt, w_ALUop, w_imm);
 
 
-    // OUTPUT DISPLAY (execute)
+    // OUTPUT DISPLAY (memory)
     wire h_ctrl_reset, h_input_enable;
     assign h_ctrl_reset = reset;
     assign h_input_enable = 1'b1;
@@ -140,25 +140,25 @@ module processor(
     register h_6 (clock, h_ctrl_reset, h_input_enable, h6_in, h6_out);
     register h_7 (clock, h_ctrl_reset, h_input_enable, h7_in, h7_out);
     // assign inputs to registers if swHash instruction (opcode = 5'b11110)
-    assign h0_in = (x_opcode == 5'b11110 && x_rd == 5'b00000) ? dx_out_A : h0_out;
-    assign h1_in = (x_opcode == 5'b11110 && x_rd == 5'b00001) ? dx_out_A : h1_out;
-    assign h2_in = (x_opcode == 5'b11110 && x_rd == 5'b00010) ? dx_out_A : h2_out;
-    assign h3_in = (x_opcode == 5'b11110 && x_rd == 5'b00011) ? dx_out_A : h3_out;
-    assign h4_in = (x_opcode == 5'b11110 && x_rd == 5'b00100) ? dx_out_A : h4_out;
-    assign h5_in = (x_opcode == 5'b11110 && x_rd == 5'b00101) ? dx_out_A : h5_out;
-    assign h6_in = (x_opcode == 5'b11110 && x_rd == 5'b00110) ? dx_out_A : h6_out;
-    assign h7_in = (x_opcode == 5'b11110 && x_rd == 5'b00111) ? dx_out_A : h7_out;
+    assign h0_in = (m_opcode == 5'b11110 && m_rd == 5'b00000) ? q_dmem : h0_out;
+    assign h1_in = (m_opcode == 5'b11110 && m_rd == 5'b00001) ? q_dmem : h1_out;
+    assign h2_in = (m_opcode == 5'b11110 && m_rd == 5'b00010) ? q_dmem : h2_out;
+    assign h3_in = (m_opcode == 5'b11110 && m_rd == 5'b00011) ? q_dmem : h3_out;
+    assign h4_in = (m_opcode == 5'b11110 && m_rd == 5'b00100) ? q_dmem : h4_out;
+    assign h5_in = (m_opcode == 5'b11110 && m_rd == 5'b00101) ? q_dmem : h5_out;
+    assign h6_in = (m_opcode == 5'b11110 && m_rd == 5'b00110) ? q_dmem : h6_out;
+    assign h7_in = (m_opcode == 5'b11110 && m_rd == 5'b00111) ? q_dmem : h7_out;
     // assign hashOutput
-    assign hashOutput[31:0] = h0_out;
-    assign hashOutput[63:32] = h1_out;
-    assign hashOutput[95:64] = h2_out;
-    assign hashOutput[127:96] = h3_out;
-    assign hashOutput[159:128] = h4_out;
-    assign hashOutput[191:158] = h5_out;
-    assign hashOutput[223:192] = h6_out;
-    assign hashOutput[255:224] = h7_out;
+    assign hashOutput[31:0] = h7_out;
+    assign hashOutput[63:32] = h6_out;
+    assign hashOutput[95:64] = h5_out;
+    assign hashOutput[127:96] = h4_out;
+    assign hashOutput[159:128] = h3_out;
+    assign hashOutput[191:160] = h2_out;
+    assign hashOutput[223:192] = h1_out;
+    assign hashOutput[255:224] = h0_out;
     // assign isHashDone = 1 if hashDone instruction (opcode = 5'b11111)
-    assign isHashDone = (x_opcode == 5'b11111) ? 1'b1 : 1'b0;
+    assign isHashDone = (m_opcode == 5'b11111) ? 1'b1 : 1'b0;
 
 
     // FETCH
