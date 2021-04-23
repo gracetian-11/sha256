@@ -55,8 +55,7 @@ module control (instruction, opcode, rd, rs, rt, shamt, ALUop, imm);
     assign ji_imm[31:27] = 5'b0;
 
     assign imm = i_type ? i_imm : ji_imm;
-    assign shamt = instruction[11:7];
-
+    
     wire is_sw, is_lw, is_bne, is_blt, is_bex, is_setx, is_jal;
     assign is_sw = opcode == 5'b00111;
     assign is_lw = opcode == 5'b01000;
@@ -65,13 +64,27 @@ module control (instruction, opcode, rd, rs, rt, shamt, ALUop, imm);
     assign is_bex = opcode == 5'b10110;
     assign is_setx = opcode == 5'b10101;
     assign is_jal = opcode == 5'b00011;
+
+    wire is_rotr, is_sla;
+    assign is_rotr = opcode == 5'b11101;
+    assign is_sla = ALUop == 5'b01011;
+
+    // if rotr --> shamt = imm
+    // if sla --> shamt = rt
+    // else --> shamt = instruction[11:7]
+    wire [4:0] shamt_if_rotr;
+    assign shamt_if_rotr = is_rotr ? imm : instruction[11:7];
+    assign shamt = is_sla ? rt : shamt_if_rotr;
+    
     
     // if blt or bne or bex--> ALUop = 5'b00001 (because isLessThan in ALU is only correct after a SUB operation)
     // if I and not blt --> ALUop = 5'b00000
+    // if rotr --> ALuop = 5'b00111
     // else --> ALUop = instruction[6:2]
-    wire [4:0] ALUop_if_I;
+    wire [4:0] ALUop_if_I, ALUop_if_branch;
     assign ALUop_if_I = (i_type) ? 5'b00000 : instruction[6:2];
-    assign ALUop = (is_blt || is_bne || is_bex) ? 5'b00001 : ALUop_if_I;
+    assign ALUop_if_branch = (is_blt || is_bne || is_bex) ? 5'b00001 : ALUop_if_I;
+    assign ALUop = is_rotr ? 5'b01001 : ALUop_if_branch;
 
     wire [4:0] rd, rs, rt;
 

@@ -61,6 +61,10 @@ module processor(
 	output [31:0] data_writeReg;
 	input [31:0] data_readRegA, data_readRegB;
 
+    // Output display
+    output [255:0] hashOutput;
+    output isHashDone;
+
 
     wire stall;
     wire input_enable;
@@ -119,6 +123,42 @@ module processor(
     wire [4:0] w_opcode, w_rd, w_rs, w_rt, w_shamt, w_ALUop;
     wire [31:0] w_imm;
     control writeback_control(mw_out_ir, w_opcode, w_rd, w_rs, w_rt, w_shamt, w_ALUop, w_imm);
+
+
+    // OUTPUT DISPLAY (execute)
+    wire h_ctrl_reset, h_input_enable;
+    assign h_ctrl_reset = reset;
+    assign h_input_enable = 1'b1;
+    wire [31:0] h0_in, h1_in, h2_in, h3_in, h4_in, h5_in, h6_in, h7_in;
+    wire [31:0] h0_out, h1_out, h2_out, h3_out, h4_out, h5_out, h6_out, h7_out;
+    register h_0 (clock, h_ctrl_reset, h_input_enable, h0_in, h0_out);
+    register h_1 (clock, h_ctrl_reset, h_input_enable, h1_in, h1_out);
+    register h_2 (clock, h_ctrl_reset, h_input_enable, h2_in, h2_out);
+    register h_3 (clock, h_ctrl_reset, h_input_enable, h3_in, h3_out);
+    register h_4 (clock, h_ctrl_reset, h_input_enable, h4_in, h4_out);
+    register h_5 (clock, h_ctrl_reset, h_input_enable, h5_in, h5_out);
+    register h_6 (clock, h_ctrl_reset, h_input_enable, h6_in, h6_out);
+    register h_7 (clock, h_ctrl_reset, h_input_enable, h7_in, h7_out);
+    // assign inputs to registers if swHash instruction (opcode = 5'b11110)
+    assign h0_in = (x_opcode == 5'b11110 && x_rd == 5'b00000) ? dx_out_A : h0_out;
+    assign h1_in = (x_opcode == 5'b11110 && x_rd == 5'b00001) ? dx_out_A : h1_out;
+    assign h2_in = (x_opcode == 5'b11110 && x_rd == 5'b00010) ? dx_out_A : h2_out;
+    assign h3_in = (x_opcode == 5'b11110 && x_rd == 5'b00011) ? dx_out_A : h3_out;
+    assign h4_in = (x_opcode == 5'b11110 && x_rd == 5'b00100) ? dx_out_A : h4_out;
+    assign h5_in = (x_opcode == 5'b11110 && x_rd == 5'b00101) ? dx_out_A : h5_out;
+    assign h6_in = (x_opcode == 5'b11110 && x_rd == 5'b00110) ? dx_out_A : h6_out;
+    assign h7_in = (x_opcode == 5'b11110 && x_rd == 5'b00111) ? dx_out_A : h7_out;
+    // assign hashOutput
+    assign hashOutput[31:0] = h0_out;
+    assign hashOutput[63:32] = h1_out;
+    assign hashOutput[95:64] = h2_out;
+    assign hashOutput[127:96] = h3_out;
+    assign hashOutput[159:128] = h4_out;
+    assign hashOutput[191:158] = h5_out;
+    assign hashOutput[223:192] = h6_out;
+    assign hashOutput[255:224] = h7_out;
+    // assign isHashDone = 1 if hashDone instruction (opcode = 5'b11111)
+    assign isHashDone = (x_opcode == 5'b11111) ? 1'b1 : 1'b0;
 
 
     // FETCH
@@ -305,7 +345,8 @@ module processor(
                               (w_opcode == 5'b00101) || // addi
                               (w_opcode == 5'b01000) || // lw
                               (w_opcode == 5'b00011) || // jal
-                              (w_opcode == 5'b10101);   // setx
+                              (w_opcode == 5'b10101) || // setx
+                              (w_opcode == 5'b11101);   // rotr
 
     // STALL LOGIC
     // stall = ((dx_ir_op == LOAD) && ((fd_ir_rs == dx_ir_rd) || 

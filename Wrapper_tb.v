@@ -40,7 +40,7 @@ module Wrapper_tb #(parameter FILE = "nop");
 	localparam MEM_DIR = "Memory Files/";
 	localparam OUT_DIR = "Output Files/";
 	localparam VERIF_DIR = "Verification Files/";
-	localparam DEFAULT_CYCLES = 500;
+	localparam DEFAULT_CYCLES = 8000;
 
 	// Inputs to the processor
 	reg clock = 0, reset = 0;
@@ -55,7 +55,7 @@ module Wrapper_tb #(parameter FILE = "nop");
 	// Wires for Test Harness
 	wire[4:0] rs1_test, rs1_in;
 	reg testMode = 0; 
-	reg[10:0] num_cycles = DEFAULT_CYCLES;
+	reg[13:0] num_cycles = DEFAULT_CYCLES;
 	reg[15*8:0] exp_text;
 	reg null;
 

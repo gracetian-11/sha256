@@ -6,17 +6,17 @@ nop
 
 # PRE PROCESSING
 addi $r16, $r0, 1024   # memory location of original message
-addi $r1, $r0, 13413   # load in "hello world" as input.
+addi $r1, $r0, 26725
 sll $r1, $r1, 16
-addi $r2, $r0, 13932
+addi $r2, $r0, 27756
 or $r1, $r1, $r2
 sw $r1, 0($r16)
-addi $r1, $r0, 7136
+addi $r1, $r0, 28448
 sll $r1, $r1, 16
-addi $r2, $r0, 15343
+addi $r2, $r0, 30575
 or $r1, $r1, $r2
 sw $r1, 1($r16)
-addi $r1, $r0, 14700
+addi $r1, $r0, 29292
 sll $r1, $r1, 16
 addi $r2, $r0, 25728
 or $r1, $r1, $r2
@@ -91,7 +91,7 @@ sw $r1, 15($r16)
 addi $r1, $r0, 0           # h = mem[0]
 addi $r2, $r0, 27145
 sll $r2, $r2, 16
-addi $r2, $r2, 58983       # h0 = 0x6a09e667 = 110101000001001 1110011001100111
+addi $r2, $r2, 58983       # h0 = 0x6a09e667 = 0110101000001001 1110011001100111
 sw $r2, 0($r1)
 addi $r2, $r0, -17561
 sll $r2, $r2, 16
@@ -99,7 +99,7 @@ addi $r2, $r2, 44677       # h1 = 0xbb67ae85 = 1011101101100111 1010111010000101
 sw $r2, 1($r1)
 addi $r2, $r0, 15470
 sll $r2, $r2, 16
-addi $r2, $r2, 62322       # h2 = 0x3c6ef372 = 11110001101110 1111001101110010 
+addi $r2, $r2, 62322       # h2 = 0x3c6ef372 = 0011110001101110 1111001101110010 
 sw $r2, 2($r1)
 addi $r2, $r0, -23217
 sll $r2, $r2, 16
@@ -107,7 +107,7 @@ addi $r2, $r2, 62778       # h3 = 0xa54ff53a = 1010010101001111 1111010100111010
 sw $r2, 3($r1)
 addi $r2, $r0, 20750
 sll $r2, $r2, 16
-addi $r2, $r2, 21119       # h4 = 0x510e527f = 101000100001110 0101001001111111
+addi $r2, $r2, 21119       # h4 = 0x510e527f = 0101000100001110 0101001001111111
 sw $r2, 4($r1)
 addi $r2, $r0, -25851
 sll $r2, $r2, 16
@@ -115,11 +115,11 @@ addi $r2, $r2, 26764       # h5 = 0x9b05688c = 1001101100000101 0110100010001100
 sw $r2, 5($r1)
 addi $r2, $r0, 8067
 sll $r2, $r2, 16
-addi $r2, $r2, 55723       # h6 = 0x1f83d9ab = 1111110000011 1101100110101011
+addi $r2, $r2, 55723       # h6 = 0x1f83d9ab = 0001111110000011 1101100110101011
 sw $r2, 6($r1)
 addi $r2, $r0, 23520
 sll $r2, $r2, 16
-addi $r2, $r2, 52505       # h7 = 0x5be0cd19 = 101101111100000 1100110100011001
+addi $r2, $r2, 52505       # h7 = 0x5be0cd19 = 0101101111100000 1100110100011001
 sw $r2, 6($r1)
 
 # INIT ARRAY OF ROUND CONSTANTS
@@ -450,48 +450,111 @@ CHUNK_LOOP:
 addi $r16, $r0, 72               # MEM[72] = w[0..63]
 addi $r17, $r0, 1024             # MEM[1024] = input
 
-addi $r25, $r0, 0                # r25: loop counter for INIT_W_LOOP1
-INIT_W_LOOP1:                    # copy input into w[0...15]
+addi $r25, $r0, 0                # r25: loop counter for INIT_W
+INIT_W:                          # copy input into w[0...15]
 lw $r6, 0($r17)
 sw $r6, 0($r16)
 addi $r17, $r17, 1
 addi $r16, $r16, 1
 addi $r25, $r25, 1
-addi $r1, $r0, 16                # r1 = 16
-blt $r25, $r1, INIT_W_LOOP1      # if r25 < 16, jump to INIT_W_LOOP1
-
-lw $r25, $r0                     # r25: loop counter for INIT_W_LOOP2
-INIT_W_LOOP2:                    # initalize w[16...63] to 0
-sw $r0, 0($r16)                  # after first loop init, r16 now point to w[16..63], init all words to 0
-addi $r16, $r16, 1
-addi $r25, $r25, 1
-addi $r1, $r0, 48
-blt $r25, $r1, INIT_W_LOOP2      # if r25 < 48, jump to INIT_W_LOOP2
+addi $r1, $r0, 16                # r1 = 15
+blt $r25, $r1, INIT_W            # if r25 < 16, jump to INIT_W
 
 addi $r25, $r0, 0     # r25: loop counter for extend_loop
 addi $r18, $r0, 72    # w address from 72 to 135
 EXTEND_LOOP:          # extend w[0...15] into w[16..63] of the message schedule array for i from 16 to 63
-lw r15, 1($r18)       # w[i-15]
-rotr r1, r15, 7     
-rotr r2, r15, 18
-rotr r3, r15, 3
+lw $r15, 1($r18)      # w[i-15]
+rotr $r1, $r15, 7     
+rotr $r2, $r15, 18
+srl $r3, $r15, 3
 xor $r1, $r1, $r2
-xor $r1, $r1, $r3     # r1 = s0
-lw r15, 14($r18)      # w[i-2]
-rotr r2, r15, 17   
-rotr r3, r15, 19
-rotr r4, r15, 10
+xor $r1, $r1, $r3     # r1 = s0 = (w[i-15] rightrotate 7) xor (w[i-15] rightrotate 18) xor (w[i-15] rightshift 3)
+
+lw $r15, 14($r18)     # w[i-2]
+rotr $r2, $r15, 17
+rotr $r3, $r15, 19
+srl $r4, $r15, 10
 xor $r2, $r2, $r3
-xor $r2, $r2, $r4     # r2 = s1
-add $r1, $r1, $r2     # r1 = s0 + s1
+xor $r2, $r2, $r4     # r2 = s1 = (w[i- 2] rightrotate 17) xor (w[i- 2] rightrotate 19) xor (w[i- 2] rightshift 10)
+
+addu $r1, $r1, $r2    # r1 = s0 + s1
 lw $r2, 0($r18)
-add $r1, $r1, $r2     # r1 = s0 + s1 + w[i-16]
+addu $r1, $r1, $r2    # r1 = s0 + s1 + w[i-16]
 lw $r2, 9($r18)
-add $r1, $r1, $r2     # r1 = s0 + s1 + w[i-16] + w[i-7]
+addu $r1, $r1, $r2    # r1 = s0 + s1 + w[i-16] + w[i-7]
+sw $r1, 16($r18)      # w[i] = s0 + s1 + w[i-16] + w[i-7]
+
 addi $r18, $r18, 1
 addi $r25, $r25, 1
 addi $r1, $r0, 48
-blt  $r25, $r1, EXTEND_LOOP      # if r25 < 48, jump to EXTEND_LOOP
+blt $r25, $r1, EXTEND_LOOP      # if r25 < 48, jump to EXTEND_LOOP
+
+addi $r26, $r0, 100
+addi $r1, $r0, 72
+lw $r2, 0($r1)
+lw $r2, 1($r1)
+lw $r2, 2($r1)
+lw $r2, 3($r1)
+lw $r2, 4($r1)
+lw $r2, 5($r1)
+lw $r2, 6($r1)
+lw $r2, 7($r1)
+lw $r2, 8($r1)
+lw $r2, 9($r1)
+lw $r2, 10($r1)
+lw $r2, 11($r1)
+lw $r2, 12($r1)
+lw $r2, 13($r1)
+lw $r2, 14($r1)
+lw $r2, 15($r1)
+lw $r2, 16($r1)
+lw $r2, 17($r1)
+lw $r2, 18($r1)
+lw $r2, 19($r1)
+lw $r2, 20($r1)
+lw $r2, 21($r1)
+lw $r2, 22($r1)
+lw $r2, 23($r1)
+lw $r2, 24($r1)
+lw $r2, 25($r1)
+lw $r2, 26($r1)
+lw $r2, 27($r1)
+lw $r2, 28($r1)
+lw $r2, 29($r1)
+lw $r2, 30($r1)
+lw $r2, 31($r1)
+lw $r2, 32($r1)
+lw $r2, 33($r1)
+lw $r2, 34($r1)
+lw $r2, 35($r1)
+lw $r2, 36($r1)
+lw $r2, 37($r1)
+lw $r2, 38($r1)
+lw $r2, 39($r1)
+lw $r2, 40($r1)
+lw $r2, 41($r1)
+lw $r2, 42($r1)
+lw $r2, 43($r1)
+lw $r2, 44($r1)
+lw $r2, 45($r1)
+lw $r2, 46($r1)
+lw $r2, 47($r1)
+lw $r2, 48($r1)
+lw $r2, 49($r1)
+lw $r2, 50($r1)
+lw $r2, 51($r1)
+lw $r2, 52($r1)
+lw $r2, 53($r1)
+lw $r2, 54($r1)
+lw $r2, 55($r1)
+lw $r2, 56($r1)
+lw $r2, 57($r1)
+lw $r2, 58($r1)
+lw $r2, 59($r1)
+lw $r2, 60($r1)
+lw $r2, 61($r1)
+lw $r2, 62($r1)
+lw $r2, 63($r1)
 
 addi $r18, $r0, 136     # intialize working variables to current hash value at MEM[136]
 addi $r19, $r0, 0       # memory address for h0,...h7
@@ -536,13 +599,13 @@ lw $r4, 6($r18)
 and $r2, $r2, $r4     # r2 = ((not e) and g)
 xor $r2, $r2, $r3     # r2 = ch = (e and f) xor ((not e) and g)
 # temp1
-add $r1, $r1, $r2     # r1 = temp1 = S1 + ch
+addu $r1, $r1, $r2     # r1 = temp1 = S1 + ch
 lw $r2, 7($r18)
-add $r1, $r1, $r2     # r1 = temp1 = h + S1 + ch 
+addu $r1, $r1, $r2     # r1 = temp1 = h + S1 + ch 
 lw $r2, 0($r16)
-add $r1, $r1, $r2     # r1 = temp1 = h + S1 + ch + k[i]
+addu $r1, $r1, $r2     # r1 = temp1 = h + S1 + ch + k[i]
 lw $r2, 0($r17)
-add $r8, $r1, $r2     # r8 = temp1 = h + S1 + ch + k[i] + w[i]
+addu $r8, $r1, $r2     # r8 = temp1 = h + S1 + ch + k[i] + w[i]
 # s0
 lw $r15, 0($r18)      # r15 = a
 rotr $r1, $r15, 2     # r1 = a rightrotate 2
@@ -561,7 +624,7 @@ and $r4, $r4, $r5     # r4 = (b and c)
 xor $r2, $r2, $r3     # r2 = maj = (a and b) xor (a and c)
 xor $r2, $r2, $r4     # r2 = maj = (a and b) xor (a and c) xor (b and c)
 # temp2
-add $r7, $r2, $r1   # r7 = temp2 = S0 + maj
+addu $r7, $r2, $r1   # r7 = temp2 = S0 + maj
 
 lw $r1, 6($r18)                # r1 = g
 sw $r1, 7($r18)      # h := g
@@ -570,16 +633,16 @@ sw $r1, 6($r18)      # g := f
 lw $r1, 4($r18)                # r1 = e
 sw $r1, 5($r18)      # f := e
 lw $r1, 3($r18)                # r1 = d
-add $r1, $r1, $r8              # r1 = d + temp1
-sw $r1, 7($r18)      # e := d + temp1
+addu $r1, $r1, $r8              # r1 = d + temp1
+sw $r1, 4($r18)      # e := d + temp1
 lw $r1, 2($r18)                # r1 = c
 sw $r1, 3($r18)      # d := c
 lw $r1, 1($r18)                # r1 = b
 sw $r1, 2($r18)      # c := b
 lw $r1, 0($r18)                # r1 = a
 sw $r1, 1($r18)      # b := a
-add $r1, $r7, $r8              # r1 = temp1 + temp2
-sw $r1, 7($r18)      # a := temp1 + temp2
+addu $r1, $r7, $r8              # r1 = temp1 + temp2
+sw $r1, 0($r18)      # a := temp1 + temp2
 
 addi $r16, $r16, 1   # increase memory address
 addi $r17, $r17, 1   # increase memory address
@@ -589,45 +652,47 @@ addi $r1, $r0, 64
 blt $r25, $r1, COMPRESS_LOOP   # if r25 < 64, jump to COMPRESS_LOOP
 
 # add compressed chunk to the current hash value:
+# r18 : a-h
+# r19 : h0-h7
 lw $r1, 0($r18)
 lw $r2, 0($r19)
-add $r1, $r1, $r2
-sw $r1, 0($r18)     # h0 := h0 + a
+addu $r1, $r1, $r2
+sw $r1, 0($r19)     # h0 := h0 + a
 
 lw $r1, 1($r18)
 lw $r2, 1($r19)
-add $r1, $r1, $r2
-sw $r1, 1($r18)     # h1 := h1 + b
+addu $r1, $r1, $r2
+sw $r1, 1($r19)     # h1 := h1 + b
 
 lw $r1, 2($r18)
 lw $r2, 2($r19)
-add $r1, $r1, $r2
-sw $r1, 2($r18)     # h2 := h2 + c
+addu $r1, $r1, $r2
+sw $r1, 2($r19)     # h2 := h2 + c
 
 lw $r1, 3($r18)
 lw $r2, 3($r19)
-add $r1, $r1, $r2
-sw $r1, 3($r18)     # h3 := h3 + d
+addu $r1, $r1, $r2
+sw $r1, 3($r19)     # h3 := h3 + d
 
 lw $r1, 4($r18)
 lw $r2, 4($r19)
-add $r1, $r1, $r2
-sw $r1, 4($r18)     # h4 := h4 + e
+addu $r1, $r1, $r2
+sw $r1, 4($r19)     # h4 := h4 + e
 
 lw $r1, 5($r18)
 lw $r2, 5($r19)
-add $r1, $r1, $r2
-sw $r1, 5($r18)     # h5 := h5 + f
+addu $r1, $r1, $r2
+sw $r1, 5($r19)     # h5 := h5 + f
 
 lw $r1, 6($r18)
 lw $r2, 6($r19)
-add $r1, $r1, $r2
-sw $r1, 6($r18)     # h6 := h6 + g
+addu $r1, $r1, $r2
+sw $r1, 6($r19)     # h6 := h6 + g
 
 lw $r1, 7($r18)
 lw $r2, 7($r19)
-add $r1, $r1, $r2
-sw $r1, 7($r18)     # h7 := h7 + h
+addu $r1, $r1, $r2
+sw $r1, 7($r19)     # h7 := h7 + h
 
 # Produce the final hash value (big-endian):
 # digest := hash := h0 append h1 append h2 append h3 append h4 append h5 append h6 append h7
@@ -635,18 +700,27 @@ addi $r17, $r0, 8192       # load absolute address of hash output
 
 lw $r1, 0($r19)
 sw $r1, 0($r17)      # copy h0 out
+swHash $r0, $r1, 0
 lw $r1, 1($r19)
 sw $r1, 1($r17)      # copy h1 out
+swHash $r1, $r1, 0
 lw $r1, 2($r19)
 sw $r1, 2($r17)      # copy h2 out
+swHash $r2, $r1, 0
 lw $r1, 3($r19)
 sw $r1, 3($r17)      # copy h3 out
+swHash $r3, $r1, 0
 lw $r1, 4($r19)
 sw $r1, 4($r17)      # copy h4 out
+swHash $r4, $r1, 0
 lw $r1, 5($r19)
 sw $r1, 5($r17)      # copy h5 out
+swHash $r5, $r1, 0
 lw $r1, 6($r19)
 sw $r1, 6($r17)      # copy h6 out
+swHash $r6, $r1, 0
 lw $r1, 7($r19)
 sw $r1, 7($r17)      # copy h7 out
+swHash $r7, $r1, 0
 
+hashDone 0

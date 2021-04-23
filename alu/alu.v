@@ -15,27 +15,53 @@ module alu(data_operandA, data_operandB, ctrl_ALUopcode,
 	
 	assign isNotEqual = data_operandA != data_operandB;
 	assign isLessThan = data_operandA < data_operandB;
-	assign isOverflow = inner_cout != inner_result[31];
-	assign overflow = (ctrl_ALUopcode == 5'b00000 || ctrl_ALUopcode == 5'b00001) ? isOverflow : 1'b0; 
+	assign overflow = inner_cout != inner_result[31];
 
 	wire [31:0] rotr_result;
 	right_rotate ROTR (inner_A, rotr_result, ctrl_shiftamt);
 
-	assign data_result = (ctrl_ALUopcode == 5'b00111) ? rotr_result : inner_result;
+	assign data_result = (ctrl_ALUopcode == 5'b01001) ? rotr_result : inner_result;
 
 	always @(ctrl_ALUopcode or inner_A or inner_B or ctrl_shiftamt)
 		begin
 			// Default state for other ctrl_ALUopcode states
-			{inner_cout, inner_result} = inner_A + inner_B;
+			// {inner_cout, inner_result} = inner_A + inner_B;
+			
 			case (ctrl_ALUopcode)
-				0 : {inner_cout, inner_result} = inner_A + inner_B; // ADD
-				1 : {inner_cout, inner_result} = inner_A - inner_B;	// SUBTRACT
-				2 : inner_result = inner_A & inner_B;  			    // AND
-				3 : inner_result = inner_A | inner_B;  			    // OR
-				4 : inner_result = inner_A << ctrl_shiftamt;		// SLL
-				5 : inner_result = inner_A >>> ctrl_shiftamt;	    // SRA
-				6 : inner_result = inner_A ^ inner_B;               // XOR
-				7 : inner_result = rotr_result;                     // ROTR
+				0 : {inner_cout, inner_result} = inner_A + inner_B;     // ADD
+				1 : {inner_cout, inner_result} = inner_A - inner_B;	    // SUBTRACT
+				2 : begin 
+						inner_result = inner_A & inner_B;  			    // AND
+						inner_cout = inner_result[31];
+					end
+				3 : begin 
+						inner_result = inner_A | inner_B;  			    // OR
+						inner_cout = inner_result[31];
+					end
+				4 : begin 
+						inner_result = inner_A << ctrl_shiftamt;		// SLL
+						inner_cout = inner_result[31];
+					end
+				5 : begin 
+						inner_result = inner_A >>> ctrl_shiftamt;	    // SRA
+						inner_cout = inner_result[31];
+					end
+				8 : begin
+						inner_result = inner_A ^ inner_B;               // XOR
+						inner_cout = inner_result[31];
+					end
+				9 : begin
+						inner_result = rotr_result;                     // ROTR
+						inner_cout = inner_result[31];
+					end
+				10 : begin
+						inner_result = data_operandA + data_operandB;	// UNSIGNED ADD
+					 	inner_cout = inner_result[31];
+					 end
+				11 : begin
+						inner_result = inner_A >> ctrl_shiftamt;	    // SLA
+					 	inner_cout = inner_result[31];
+					 end
 			endcase
 		end
 	
