@@ -120,7 +120,7 @@ sw $r2, 6($r1)
 addi $r2, $r0, 23520
 sll $r2, $r2, 16
 addi $r2, $r2, 52505       # h7 = 0x5be0cd19 = 0101101111100000 1100110100011001
-sw $r2, 6($r1)
+sw $r2, 7($r1)
 
 # INIT ARRAY OF ROUND CONSTANTS
 addi $r16, $r0, 8          # initalize k; mem[k] = 8
@@ -324,7 +324,7 @@ sll $r1, $r1, 16
 addi $r2, $r0, 11397
 or $r1, $r1, $r2
 sw $r1, 39($r16)           # k[39] = 0x92722c85
-addi $r1, $r0, 41664
+addi $r1, $r0, 41663
 sll $r1, $r1, 16
 addi $r2, $r0, 59553
 or $r1, $r1, $r2
@@ -489,72 +489,14 @@ addi $r25, $r25, 1
 addi $r1, $r0, 48
 blt $r25, $r1, EXTEND_LOOP      # if r25 < 48, jump to EXTEND_LOOP
 
-addi $r26, $r0, 100
-addi $r1, $r0, 72
-lw $r2, 0($r1)
-lw $r2, 1($r1)
-lw $r2, 2($r1)
-lw $r2, 3($r1)
-lw $r2, 4($r1)
-lw $r2, 5($r1)
-lw $r2, 6($r1)
-lw $r2, 7($r1)
-lw $r2, 8($r1)
-lw $r2, 9($r1)
-lw $r2, 10($r1)
-lw $r2, 11($r1)
-lw $r2, 12($r1)
-lw $r2, 13($r1)
-lw $r2, 14($r1)
-lw $r2, 15($r1)
-lw $r2, 16($r1)
-lw $r2, 17($r1)
-lw $r2, 18($r1)
-lw $r2, 19($r1)
-lw $r2, 20($r1)
-lw $r2, 21($r1)
-lw $r2, 22($r1)
-lw $r2, 23($r1)
-lw $r2, 24($r1)
-lw $r2, 25($r1)
-lw $r2, 26($r1)
-lw $r2, 27($r1)
-lw $r2, 28($r1)
-lw $r2, 29($r1)
-lw $r2, 30($r1)
-lw $r2, 31($r1)
-lw $r2, 32($r1)
-lw $r2, 33($r1)
-lw $r2, 34($r1)
-lw $r2, 35($r1)
-lw $r2, 36($r1)
-lw $r2, 37($r1)
-lw $r2, 38($r1)
-lw $r2, 39($r1)
-lw $r2, 40($r1)
-lw $r2, 41($r1)
-lw $r2, 42($r1)
-lw $r2, 43($r1)
-lw $r2, 44($r1)
-lw $r2, 45($r1)
-lw $r2, 46($r1)
-lw $r2, 47($r1)
-lw $r2, 48($r1)
-lw $r2, 49($r1)
-lw $r2, 50($r1)
-lw $r2, 51($r1)
-lw $r2, 52($r1)
-lw $r2, 53($r1)
-lw $r2, 54($r1)
-lw $r2, 55($r1)
-lw $r2, 56($r1)
-lw $r2, 57($r1)
-lw $r2, 58($r1)
-lw $r2, 59($r1)
-lw $r2, 60($r1)
-lw $r2, 61($r1)
-lw $r2, 62($r1)
-lw $r2, 63($r1)
+addi $r3, $r0, 136
+addi $r25, $r0, 0
+addi $r18, $r0, 0
+DEBUG_LOOP:
+lw $r1, 0($r18)
+addi $r18, $r18, 1
+addi $r25, $r25, 1
+blt $r25, $r3, DEBUG_LOOP
 
 addi $r18, $r0, 136     # intialize working variables to current hash value at MEM[136]
 addi $r19, $r0, 0       # memory address for h0,...h7
@@ -593,8 +535,8 @@ lw $r3, 5($r18)       # r3 = f
 and $r3, $r3, $r2     # r3 = (e and f)
 addi $r4, $r0, 65535  # 0xFFFFFFFF
 sll $r4, $r4, 16
-addi $r4, $r0, 65535 
-sub $r2, $r4, $r2     # r2 = (not e)
+addi $r4, $r4, 65535 
+xor $r2, $r4, $r2     # r2 = (not e)
 lw $r4, 6($r18)
 and $r2, $r2, $r4     # r2 = ((not e) and g)
 xor $r2, $r2, $r3     # r2 = ch = (e and f) xor ((not e) and g)

@@ -76,7 +76,6 @@ module control (instruction, opcode, rd, rs, rt, shamt, ALUop, imm);
     assign shamt_if_rotr = is_rotr ? imm : instruction[11:7];
     assign shamt = is_sla ? rt : shamt_if_rotr;
     
-    
     // if blt or bne or bex--> ALUop = 5'b00001 (because isLessThan in ALU is only correct after a SUB operation)
     // if I and not blt --> ALUop = 5'b00000
     // if rotr --> ALuop = 5'b00111
@@ -85,8 +84,6 @@ module control (instruction, opcode, rd, rs, rt, shamt, ALUop, imm);
     assign ALUop_if_I = (i_type) ? 5'b00000 : instruction[6:2];
     assign ALUop_if_branch = (is_blt || is_bne || is_bex) ? 5'b00001 : ALUop_if_I;
     assign ALUop = is_rotr ? 5'b01001 : ALUop_if_branch;
-
-    wire [4:0] rd, rs, rt;
 
     // if jal (00011) --> rd = $r31 = 5'b11111
     // if setx (10101) --> rd = $rstatus = 5'b11110
